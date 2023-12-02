@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:demo/screens/login.dart';
 
+import '../Classes.dart';
+
 
 class LaunchPage extends StatefulWidget {
   @override
@@ -15,7 +17,7 @@ class _LaunchPageState extends State<LaunchPage> {
             ()=>Navigator.pushReplacement(context,
             MaterialPageRoute(builder:
                 (context) =>
-                const LoginPage()
+                Wrapper()
             )
         )
     );

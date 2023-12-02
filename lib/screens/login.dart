@@ -1,5 +1,7 @@
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:demo/Classes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,25 +14,17 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _passHidden = true;
   final formKey = GlobalKey<FormState>();
-  TextEditingController emailContr = TextEditingController();
-  TextEditingController passContr = TextEditingController();
+  final TextEditingController emailContr = TextEditingController();
+  final TextEditingController passContr = TextEditingController();
 
-
-  // Future <void> login() async{
-  //   // final auth = FirebaseAuth.instance;
-  //   // auth.signInWithEmailAndPassword(email: emailContr.text, password: emailContr.text);
-  // }
-  login(){}
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Login Page"),
-      //   //backgroundColor: Theme.of(context).colorScheme.onPrimary,
-      //   centerTitle: true,
-      // ),
 
+    final authService = Provider.of<AuthService>(context);
+
+
+    return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Form(key: formKey,
@@ -90,8 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     validator: (valid){
                       if(valid == null || valid.isEmpty) {return ('Password required.');}
-                      else if(valid.length < 8){return ('Password length must be > 8.');}
-                      else return null;
+                      return null;
                     },
                   ),
                   const SizedBox(height:10),
@@ -116,14 +109,20 @@ class _LoginPageState extends State<LoginPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColorDark,
                     ),
-                    onPressed: (){
-                      if(formKey.currentState!.validate() ){
-                        debugPrint("All is good! Logged in.");
-                        Navigator.pushReplacementNamed(context, "/UserRides");
-                        // formKey.currentState!.reset();
-                        login();
-                      }
-                    }, child: const Text("Login"),),
+                    onPressed: () async {
+                      if(formKey.currentState!.validate()) {
+                        try{
+                         await authService.signInWithEmailAndPassword(email: emailContr.text, password: passContr.text);}
+                        catch (error){
+                          debugPrint("SALMA! Signup error happened:${error.toString()}");
+                          return;
+                        }
+                          debugPrint("All is good! Logged in.");
+                          if (!mounted) return;
+                          Navigator.pushReplacementNamed(context, "/UserRides");
+                          // formKey.currentState!.reset();
+                        }
+                  }, child: const Text("Login"),),
 
 
 
@@ -132,6 +131,10 @@ class _LoginPageState extends State<LoginPage> {
                   GestureDetector(
                       onTap: (){
                         debugPrint("Go to sign up page...");
+                        //TODO routing FOR ALL PAGES
+                        while(Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        }
                         Navigator.pushNamed(context, "/SignUp");
                       },
                       child: Text(
@@ -157,4 +160,25 @@ class _LoginPageState extends State<LoginPage> {
     );
 
   }
+
+  // Future<bool> signInWithEmailAndPassword() async{
+  //   try {
+  //     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+  //         email: emailContr.text,
+  //         password: passContr.text
+  //     );
+  //     return true;
+  //   } on FirebaseAuthException catch (e) {
+  //     //TODO this works! but debug statements do not show...
+  //
+  //     debugPrint("SALMA! Login error happened:${e.message}");
+  //
+  //     // else if (e.code == 'wrong-password') {
+  //     //   print('Wrong password provided for that user.');
+  //     // }
+  //
+  //   }
+  //   return false;
+  //
+  // }
 }

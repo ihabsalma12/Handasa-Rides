@@ -1,4 +1,9 @@
+import 'package:demo/Classes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'my_rides.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -13,16 +18,19 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _signupPassVisible = true;
   final signupFormKey = GlobalKey<FormState>();
-  TextEditingController fnameContr = TextEditingController();
-  TextEditingController signupEmailContr = TextEditingController();
-  TextEditingController signupPassContr = TextEditingController();
-  TextEditingController confirmPassContr = TextEditingController();
+  final TextEditingController fnameContr = TextEditingController();
+  final TextEditingController signupEmailContr = TextEditingController();
+  final TextEditingController signupPassContr = TextEditingController();
+  final TextEditingController confirmPassContr = TextEditingController();
 
 
 
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -104,12 +112,14 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         validator: (valid){
                           if(valid == null || valid.isEmpty) {return ('Password required.');}
-                          return null;
+                          else if(valid.length < 8){return ('Password length must be > 8.');}
+                          else return null;
                         },
                         ),
                   const SizedBox(height: 10),
                   TextFormField(
                     controller: confirmPassContr,
+                    obscureText: true,
                     decoration: const InputDecoration(labelText: "Confirm Password",
                         //floatingLabelBehavior: FloatingLabelBehavior.always,
                         border: OutlineInputBorder(
@@ -123,7 +133,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
                     ),
                     validator: (valid){
-                      if(valid == null || valid.isEmpty) {return ('Password required.');}
+                      if(valid == null || valid.isEmpty) {return ('Confirm password required.');}
+                      else if(valid != signupPassContr.text){return ('Does not match \'Password\'.');}
                       return null;
                     },
                   ),
@@ -135,10 +146,24 @@ class _SignUpPageState extends State<SignUpPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColorDark,
                       ),
-                      onPressed: (){
-                        if(signupFormKey.currentState!.validate() ){
+                      onPressed: ()async{
+                        //TODO validate email using regex.
+                        // TODO output snackbar for "Welcome" or for errors signing up.
+                        if(signupFormKey.currentState!.validate()){
+                          try{await authService.createUserWithEmailAndPassword(
+                              email: signupEmailContr.text, password: signupPassContr.text);}
+                          catch (error){
+                            debugPrint("SALMA! Signup error happened:${error.toString()}");
+                            return;
+                          }
+
                           debugPrint("All is good! Signed up.");
-                          Navigator.pushReplacementNamed(context, "/UserRides");
+                          if (!mounted) return;
+                          //Navigator.pop(context);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                                  builder: (c) => const UserRidesPage()),
+                                  (route) => false);
+
                           // formKey.currentState!.reset();
                         }},
                       child: const Text("Sign up"),
@@ -156,5 +181,30 @@ class _SignUpPageState extends State<SignUpPage> {
     );
 
   }
+
+  // Future <bool> createUserWithEmailAndPassword() async {
+  //   try {
+  //     final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+  //       email: signupEmailContr.text,
+  //       password: signupPassContr.text,
+  //     );
+  //     return true;
+  //   } on FirebaseAuthException catch (e) {
+  //     //TODO this works! but debug statements do not show...
+  //     //TODO fix the exceptions
+  //
+  //     debugPrint("SALMA! Signup error happened:$e");
+  //     // if (e.code == 'weak-password') {
+  //     //   debugPrint('The password provided is too weak.');
+  //     // } else
+  //     // if (e.code == 'email-already-in-use') {
+  //     //   print('The account already exists for that email.');
+  //     // }
+  //    }
+  //     // catch (e) {
+  //   //   print(e.toString());
+  //   // }
+  //   return false;
+  // }
 
 }
