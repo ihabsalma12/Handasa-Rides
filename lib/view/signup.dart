@@ -1,8 +1,7 @@
-import 'package:demo/Classes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../controller.dart';
 import 'my_rides.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -77,7 +76,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
                           labelText: "Email",
-                            hintText: "<your_ID_here>@eng.asu.edu.eg",
+                            hintText: "<your_ID>@eng.asu.edu.eg",
                             //floatingLabelBehavior: FloatingLabelBehavior.always,
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -87,6 +86,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         validator: (valid){
                           if(valid == null || valid.isEmpty) {return ('Email required.');}
+                          else if(!valid.contains('@eng.asu.edu.eg', 7)) {return ('Email must be xxxxxxx@eng.asu.edu.eg');}
                           return null;
                         }
                     ),
@@ -147,25 +147,33 @@ class _SignUpPageState extends State<SignUpPage> {
                         backgroundColor: Theme.of(context).primaryColorDark,
                       ),
                       onPressed: ()async{
-                        //TODO validate email using regex.
                         // TODO output snackbar for "Welcome" or for errors signing up.
                         if(signupFormKey.currentState!.validate()){
                           try{await authService.createUserWithEmailAndPassword(
+                            fullName: fnameContr.text,
                               email: signupEmailContr.text, password: signupPassContr.text);}
                           catch (error){
-                            debugPrint("SALMA! Signup error happened:${error.toString()}");
+                            final snackBar = SnackBar(content: Text('SALMA! Signup error happened: ${error.toString()}'),);
+                            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(snackBar);
                             return;
                           }
 
                           debugPrint("All is good! Signed up.");
-                          if (!mounted) return;
-                          //Navigator.pop(context);
-                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
-                                  builder: (c) => const UserRidesPage()),
-                                  (route) => false);
+                          if (!mounted) {
+                            return;
+                          } else{
+                            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                                builder: (c) => const UserRidesPage()),
+                                    (route) => false);
+                            const snackBar = SnackBar(content: Text('Welcome, user'),);
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          }
+
 
                           // formKey.currentState!.reset();
-                        }},
+                        }
+
+                        },
                       child: const Text("Sign up"),
                   ),
 

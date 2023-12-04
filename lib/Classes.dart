@@ -1,114 +1,65 @@
-import 'package:demo/screens/login.dart';
-import 'package:demo/screens/my_rides.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
-
-class AuthService{
-  final auth.FirebaseAuth _firebaseAuth = auth.FirebaseAuth.instance;
-
-  Rider? _riderFromFirebase(auth.User? user) {
-    if (user == null) {
-      return null;
-    }
-    return Rider(user.uid, user.email);
-  }
-
-  Stream<Rider?>? get user{
-    return _firebaseAuth.authStateChanges().map(_riderFromFirebase);
-  }
-
-  Future<Rider?> signInWithEmailAndPassword({required String email, required String password}) async {
-    // try {
-      final credential = await _firebaseAuth.signInWithEmailAndPassword(
-          email: email, password: password);
-      return _riderFromFirebase(credential.user);
-    // }
-    // on FirebaseAuthException catch (e) {
-    //   //TODO this works! but debug statements do not show...
-    //
-    //   debugPrint("SALMA! Login error happened:${e.message}");
-    // }
-    // auth.notifyListeners();
-  }
-
-  Future<Rider?> createUserWithEmailAndPassword({required String email, required String password}) async {
-    final credential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-    return _riderFromFirebase(credential.user);
-    // auth.notifyListeners();
-  }
-
-  Future<void> signOut() async {
-    return await _firebaseAuth.signOut();
-    // notifyListeners();
-  }
-
-}
-
 
 List <Ride> rides = [
-  Ride("Gate 2", "Maadi", "5:30 pm"),
-  Ride("Nasr City", "Gate 6", "7:30 am"),
-  Ride("Gate 6", "New Cairo", "5:30 pm"),
   Ride("Gate 3", "Maadi", "5:30 pm"),
+  Ride("Nasr City", "Gate 3", "7:30 am"),
+  Ride("Gate 4", "New Cairo", "5:30 pm"),
+  Ride("Gate 3", "Dokki", "5:30 pm"),
+  Ride("Gate 4", "6th October", "5:30 pm"),
+  Ride("Madinaty", "Gate 3", "7:30 am"),
+  Ride("Gate 4", "Korba", "5:30 pm"),
+  Ride("Gate 4", "Al Azhar", "5:30 pm"),
+  Ride("Gate 3", "Sayeda Aisha", "5:30 pm"),
+  Ride("Shoubra ElKheima", "Gate 3", "7:30 am"),
+  Ride("Gate 3", "Saqr Qureish", "5:30 pm"),
+  Ride("Gate 3", "Zamalek", "5:30 pm"),
 ]; //fetch from db
 
 
 
 class Ride {
+  String? id;
   String? pickup;
   String? destination;
-  int? distance;
   String? time;
   String? price;
-  Driver? driver;
-  List <Rider> riders = [];
+  String? driver;
+  int? distance;
+  String? status;
 
   Ride(String this.pickup, String this.destination, String this.time);
+
+  static Ride fromJSON(Map<String, dynamic> json) => Ride(
+    //TODO fix this so we can fetch all data then create a class with ALL that info
+    //id : json['id'],
+    json['from_loc'],
+    json ['to_loc'],
+    json['time']
+  );
+
 
 }
 
 class Student {
   final String uid;
+  final String? fullName;
   final String? email;
+  final String? password;
 
-  Student(this.uid, this.email);
+  Student(this.uid, this.fullName, this.email, this.password);
 
 }
 
 class Driver extends Student{
-  Driver(super.uid, super.email);
+  Driver(super.uid, super.fullName, super.email, super.password);
 
 }
 
 class Rider extends Student{
-  Rider(super.uid, super.email);
+  Rider(super.uid, super.fullName, super.email, super.password);
 }
 
 
 
-class Wrapper extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-    return StreamBuilder<Rider?>(
-      stream: authService.user,
-      builder: (_, AsyncSnapshot<Rider?> snapshot){
-        if(snapshot.connectionState == ConnectionState.active){
-          final Rider? rider = snapshot.data;
-          return rider == null ? LoginPage() : UserRidesPage();
-        }
-        else{
-          return Scaffold(body:Center(child:CircularProgressIndicator(),),);
-        }
-      },
-    );
-
-  }
-
-}
 
 
 

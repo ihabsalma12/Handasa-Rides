@@ -1,7 +1,7 @@
-import 'package:demo/Classes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -114,15 +114,23 @@ class _LoginPageState extends State<LoginPage> {
                         try{
                          await authService.signInWithEmailAndPassword(email: emailContr.text, password: passContr.text);}
                         catch (error){
-                          debugPrint("SALMA! Signup error happened:${error.toString()}");
+                          final snackBar = SnackBar(content: Text('SALMA! Login error happened: ${error.toString()}'),);
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           return;
                         }
                           debugPrint("All is good! Logged in.");
                           if (!mounted) return;
-                          Navigator.pushReplacementNamed(context, "/UserRides");
+                          else{
+                            Navigator.pushReplacementNamed(context, "/UserRides");
+                            //TODO snackbar listener
+                            final snackBar = SnackBar(content: Text('Welcome, username!'),);
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                          }
                           // formKey.currentState!.reset();
                         }
                   }, child: const Text("Login"),),
+
 
 
 
