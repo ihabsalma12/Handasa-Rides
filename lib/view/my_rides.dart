@@ -30,14 +30,13 @@ class _UserRidesPageState extends State<UserRidesPage> {
                   onPressed: () async {
                     await authService.signOut();
                     debugPrint("Signing you out!");
-                    //Navigator.pushReplacementNamed(context, "/Login");
+                    Navigator.pushReplacementNamed(context, "/Login");
                   },
                   style: ElevatedButton.styleFrom(
                     //padding: EdgeInsets.symmetric(horizontal: 15.0),
                     elevation: 2.0,
                     shape: RoundedRectangleBorder(
-                      //eccentricity: 0.5
-                      borderRadius: BorderRadius.circular(20),
+                      //eccentricity: 0.5                      borderRadius: BorderRadius.circular(20),
                     ),
                     backgroundColor: Theme.of(context).secondaryHeaderColor,
                   ),
