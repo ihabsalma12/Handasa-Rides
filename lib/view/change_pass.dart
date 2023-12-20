@@ -1,7 +1,7 @@
+import 'package:demo/services/AuthService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../controller.dart';
 
 class ChangePassPage extends StatefulWidget {
   const ChangePassPage({super.key});
@@ -13,7 +13,7 @@ class ChangePassPage extends StatefulWidget {
 class _ChangePassPageState extends State<ChangePassPage> {
 
   bool _passHidden = true;
-  final formKey = GlobalKey<FormState>();
+  final changePassFormKey = GlobalKey<FormState>();
   final TextEditingController existingEmailContr = TextEditingController();
   final TextEditingController newPassContr = TextEditingController();
 
@@ -22,14 +22,12 @@ class _ChangePassPageState extends State<ChangePassPage> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
-    final riderUser = Provider.of<AuthService>(context).user;
-
 
 
     return Scaffold(
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Form(key: formKey,
+          child: Form(key: changePassFormKey,
             child: Center(
               child: SingleChildScrollView(
 
@@ -43,7 +41,7 @@ class _ChangePassPageState extends State<ChangePassPage> {
                       fontStyle: FontStyle.italic,
                       fontSize: 21,
                     )),
-                    const SizedBox(height:40,),
+                    const SizedBox(height:20,),
                     TextFormField(
                         controller: existingEmailContr,
                         keyboardType: TextInputType.emailAddress,
@@ -95,12 +93,33 @@ class _ChangePassPageState extends State<ChangePassPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColorDark,
                       ),
-                      onPressed: () async {
-                        if(formKey.currentState!.validate()) {
+                        onPressed: (){
+                          // // TODO output snackbar for "Welcome" or for errors signing up.
+                          // if(changePassFormKey.currentState!.validate()){
+                          //   try{await authService.sendPasswordResetEmail(
+                          //       fullName: fnameContr.text,
+                          //       email: signupEmailContr.text, password: signupPassContr.text);}
+                          //   catch (error){
+                          //     final snackBar = SnackBar(content: Text('SALMA! Signup error happened: ${error.toString()}'),);
+                          //     if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          //     return;
+                          //   }
+                          //
+                          //   debugPrint("All is good! Signed up.");
+                          //   if (!mounted) {
+                          //     return;
+                          //   } else{
+                          //     Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                          //         builder: (c) => const UserRidesPage()),
+                          //             (route) => false);
+                          //     const snackBar = SnackBar(content: Text('Welcome, user'),);
+                          //     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          //   }
 
-                          // formKey.currentState!.reset();
-                        }
-                      }, child: const Text("Change my password"),),
+
+                            // formKey.currentState!.reset();
+                          },
+                      child: const Text("Change my password"),),
 
 
 

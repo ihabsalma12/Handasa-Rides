@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:demo/controller.dart';
+import 'package:demo/classes/FilteredRidesProvider.dart';
+import 'package:demo/classes/BottomSheetProvider.dart';
+import 'package:demo/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Classes.dart';
+import 'package:demo/classes/Ride.dart';
 
 
 
@@ -26,11 +28,15 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
     List <String> allLocations = Provider.of<BottomSheetProvider>(context).locations;
     List<String> rideTimes = Provider.of<BottomSheetProvider>(context).ridesTimes;
 
+
     List<Ride> routeList = Provider.of<FilteredRidesProvider>(context).routesList;
 
-    // List<Ride> rides = [];
+    Future filterRoutes() async{
+      String from_loc = Provider.of<BottomSheetProvider>(context, listen: false).selectedPickupLoc;
+      String to_loc = Provider.of<BottomSheetProvider>(context, listen: false).selectedDestinationLoc;
+      String time = Provider.of<BottomSheetProvider>(context, listen: false).selectedTime;
+      bool bypass = Provider.of<BottomSheetProvider>(context, listen: false).bypassValue;
 
-    Future filterRoutes(String from_loc, String to_loc, String time, bool bypass){
       debugPrint("You searched for a ride: ${from_loc}, ${to_loc}, ${time}, ${bypass.toString()}");
 
       //cloudfirestore query
@@ -100,16 +106,21 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
             }
 
             //Stream<List<Ride>> filter_rides can also be the output of this whole function.
-            List<Ride> queryResults = res.map((docSnapshot) => Ride.fromJSON(docSnapshot.data())).toList();
-            // queryResults.addAll(res); //TODO Bypass time constraint
+
+            // queryResults.addAll(res);
             // Provider.of<FilteredRidesProvider>(context, listen: false).updateRouteList(queryResults);
             //res is a list of maps, where each map is a jsonQueryDocumentSnapshot instance aka a document
+
+
+            List<Ride> queryResults = res.map((docSnapshot) => Ride.fromJSON(docSnapshot.id, docSnapshot.data())).toList();
             return queryResults;
+
 
           },
           onError: (e) => debugPrint("Error completing: $e"),
       );
-      return queryResults;
+      Provider.of<FilteredRidesProvider>(context, listen: false).updateRouteList(await queryResults);
+
       // debugPrint("SALMA!! ${intermediate.toString()}");
 
       // final suggestions = allBooks.where((book){
@@ -147,6 +158,7 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
                 // const SizedBox(height:10),
 
                 RadioListTile(
+                  activeColor: Colors.lightGreenAccent,
 
                   value: rideTimes[0],
                   groupValue: Provider.of<BottomSheetProvider>(context).selectedTime,
@@ -156,6 +168,9 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
                   subtitle: Text("ride to ASUENG", style: TextStyle(fontStyle: FontStyle.italic),),
                 ),
                 RadioListTile(
+                  activeColor: Colors.lightGreenAccent,
+
+
                   value: rideTimes[1],
                   groupValue: Provider.of<BottomSheetProvider>(context).selectedTime,
                   onChanged: (value) => Provider.of<BottomSheetProvider>(context, listen: false).toggleTime(value),
@@ -181,12 +196,9 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
                     onChanged: (loc) => Provider.of<BottomSheetProvider>(context, listen: false).changePickup(loc),
                     decoration: InputDecoration(
                         labelText: "Choose your pickup point",
-                        labelStyle: TextStyle(fontSize:14,color: Theme.of(context).primaryColor)
+                        labelStyle: TextStyle(fontSize:16,color: Theme.of(context).primaryColor)
                     ),
-
-                  ),
-                ),
-                // const SizedBox(height:10),
+                  ),), // const SizedBox(height:10),
                 SizedBox(
                   // width: 100,
                   child: DropdownButtonFormField <String>(
@@ -201,9 +213,8 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
                     onChanged: (loc) => Provider.of<BottomSheetProvider>(context, listen: false).changeDestination(loc),
                     decoration: InputDecoration(
                         labelText: "Choose your destination point",
-                        labelStyle: TextStyle(fontSize:14,color: Theme.of(context).primaryColor)
+                        labelStyle: TextStyle(fontSize:16,color: Theme.of(context).primaryColor)
                     ),
-
                   ),
                 ),
 
@@ -220,29 +231,17 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
                   children: [
                     ElevatedButton(
                     onPressed: () async {
-                      debugPrint("You searched for a ride: ${Provider.of<BottomSheetProvider>(context, listen: false).selectedPickupLoc}, ${Provider.of<BottomSheetProvider>(context, listen: false).selectedDestinationLoc}, ${Provider.of<BottomSheetProvider>(context, listen: false).selectedTime}, ${Provider.of<BottomSheetProvider>(context, listen: false).bypassValue}");
-                      routeList = await filterRoutes(
-                        Provider.of<BottomSheetProvider>(context, listen: false).selectedPickupLoc,
-                        Provider.of<BottomSheetProvider>(context, listen: false).selectedDestinationLoc,
-                        Provider.of<BottomSheetProvider>(context, listen: false).selectedTime,
-                        Provider.of<BottomSheetProvider>(context, listen: false).bypassValue,
-                      );
-                      debugPrint("Updating provider: ");
-                      routeList.forEach((element) =>
-                        debugPrint("${element.destination}, pickup: ${element.pickup} @ ${element.time}")
-                      );
-                      Provider.of<FilteredRidesProvider>(context, listen: false).updateRouteList(routeList);
+                      // debugPrint("You searched for a ride: ${Provider.of<BottomSheetProvider>(context, listen: false).selectedPickupLoc}, ${Provider.of<BottomSheetProvider>(context, listen: false).selectedDestinationLoc}, ${Provider.of<BottomSheetProvider>(context, listen: false).selectedTime}, ${Provider.of<BottomSheetProvider>(context, listen: false).bypassValue}");
+                      // debugPrint("Updating provider: ");
+                      // routeList.forEach((element) =>
+                      //   debugPrint("${element.destination}, pickup: ${element.pickup} @ ${element.time}")
+                      // );
+                      filterRoutes();
 
                       if(context.mounted)Navigator.pop(context);
 
                     },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 2.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      backgroundColor: Theme.of(context).secondaryHeaderColor,
-                    ),
+                    style: filterButtonStyle(),
                     child: Text("Filter rides", style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).primaryColorDark,)),
@@ -276,10 +275,10 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
           color: Colors.white, fontSize:20, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),),
             toolbarHeight: 120.0,
             automaticallyImplyLeading: false,
-            leading:  IconButton(onPressed:(){Navigator.pop(context);}, icon: const Icon(Icons.account_circle)),
+            leading:  IconButton(onPressed:(){Navigator.pop(context);}, icon: const Icon(Icons.account_circle, color: Colors.white,)),
             flexibleSpace: Container(),
             centerTitle: true,
-            //backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme.of(context).primaryColor,
             elevation: 0,
             shape: const Border(
             bottom: BorderSide(width: 1, color: Colors.black12),
@@ -291,26 +290,31 @@ class _RouteSelectionPageState extends State<RouteSelectionPage> {
         onPressed: () {
         Navigator.pushReplacementNamed(context, '/FilterRoutes');
         },
-        child: IconButton(onPressed: (){_displayBottomSheet(context);} ,icon: const Icon(Icons.filter_list))),
+        child: IconButton(onPressed: (){_displayBottomSheet(context);} ,
+          icon: Icon(Icons.filter_list, color: Theme.of(context).primaryColorDark),)),
       resizeToAvoidBottomInset: false,
-      body: ListView.builder(
-        itemCount: routeList.length,
-        itemBuilder: (context, index) {
-          return Card(
-            //margin: EdgeInsets.all(8.0),
-            //padding: const EdgeInsets.all(20.0),
-            color: Colors.grey.shade300,
-            child: ListTile(
-              onTap: (){
-                Navigator.pushNamed(context, "/RouteDetails");
-              },
-              title: Text("${routeList[index].destination}", style: const TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: Text("pickup: ${routeList[index].pickup} @ ${routeList[index].time}" ),
-            ),
-          );
-        },
-      ),
-
+      body:
+      ListView.builder(
+          itemCount: routeList.length,
+          itemBuilder: (context, index) {
+            return Card(
+              margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              // padding: const EdgeInsets.all(20.0),
+              color: Colors.grey.shade300,
+              child: ListTile(
+                onTap: () {
+                  debugPrint("'doc_id' : ${routeList[index].id}");
+                  Navigator.pushNamed(context, "/RouteDetails", arguments: {'doc_id' : routeList[index].id});
+                },
+                title: Text("${routeList[index].destination}",
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                    "pickup: ${routeList[index].pickup} @ ${routeList[index]
+                        .time}"),
+              ),
+            );
+          },
+        ),
     );
 
 

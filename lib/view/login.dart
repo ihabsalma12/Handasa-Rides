@@ -1,7 +1,7 @@
+import 'package:demo/services/AuthService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -87,34 +87,34 @@ class _LoginPageState extends State<LoginPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height:10),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: (){
-                        debugPrint("Go to change password page...");
-                        Navigator.pushNamed(context, "/ChangePass");
-                      },
-                      child: Text(
-                        "Forgot password?",
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColorDark,
-                            fontStyle: FontStyle.italic),),
-                    ),
-                  ),
+                  // const SizedBox(height:10),
+                  // Align(
+                  //   alignment: Alignment.centerLeft,
+                  //   child: GestureDetector(
+                  //     onTap: (){
+                  //       debugPrint("Go to change password page...");
+                  //       Navigator.pushNamed(context, "/ChangePass");
+                  //     },
+                  //     child: Text(
+                  //       "Forgot password?",
+                  //       style: TextStyle(
+                  //           color: Theme.of(context).primaryColorDark,
+                  //           fontStyle: FontStyle.italic),),
+                  //   ),
+                  // ),
 
 
                   const SizedBox(height:20),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColorDark,
-                    ),
+                    // style: ElevatedButton.styleFrom(
+                    //   backgroundColor: Theme.of(context).primaryColorDark,
+                    // ),
                     onPressed: () async {
                       if(formKey.currentState!.validate()) {
                         try{
                          await authService.signInWithEmailAndPassword(email: emailContr.text, password: passContr.text);}
                         catch (error){
-                          final snackBar = SnackBar(content: Text('SALMA! Login error happened: ${error.toString()}'),);
+                          final snackBar = SnackBar(content: Text('Login error happened: ${error.toString()}'),);
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           return;
                         }
@@ -122,9 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (!mounted) return;
                           else{
                             Navigator.pushReplacementNamed(context, "/UserRides");
-                            //TODO snackbar listener
-                            final snackBar = SnackBar(content: Text('Welcome, username!'),);
-                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Welcome, ${authService.getDisplayName()}!'),));
 
                           }
                           // formKey.currentState!.reset();
@@ -135,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
 
 
 
-                  const SizedBox(height:20),
+                  const SizedBox(height:30),
                   GestureDetector(
                       onTap: (){
                         debugPrint("Go to sign up page...");

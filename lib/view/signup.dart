@@ -1,7 +1,6 @@
+import 'package:demo/services/AuthService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../controller.dart';
 import 'my_rides.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -143,9 +142,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
                   const SizedBox(height:20,),
                   ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColorDark,
-                      ),
+                      // style: ElevatedButton.styleFrom(
+                      //   backgroundColor: Theme.of(context).primaryColorDark,
+                      // ),
                       onPressed: ()async{
                         // TODO output snackbar for "Welcome" or for errors signing up.
                         if(signupFormKey.currentState!.validate()){
@@ -153,7 +152,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             fullName: fnameContr.text,
                               email: signupEmailContr.text, password: signupPassContr.text);}
                           catch (error){
-                            final snackBar = SnackBar(content: Text('SALMA! Signup error happened: ${error.toString()}'),);
+                            final snackBar = SnackBar(content: Text('Signup error happened: ${error.toString()}'),);
                             if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(snackBar);
                             return;
                           }
@@ -165,8 +164,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
                                 builder: (c) => const UserRidesPage()),
                                     (route) => false);
-                            const snackBar = SnackBar(content: Text('Welcome, user'),);
-                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Welcome, ${authService.getDisplayName()}!'),));
+
                           }
 
 
