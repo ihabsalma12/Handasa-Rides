@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class RiderSubcollectionWidget extends StatelessWidget {
 
   final String route_id;
-  final String rider_uid;
+  final String? rider_uid;
 
   RiderSubcollectionWidget({super.key, required this.route_id, required this.rider_uid});
 

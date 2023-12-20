@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:demo/classes/RiderSubcollectionWidget.dart';
+import 'package:demo/helpers/DatabaseUserID.dart';
+import 'package:demo/helpers/RiderSubcollectionWidget.dart';
 import 'package:demo/services/FirebaseService.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:demo/classes/Rider.dart';
+import 'package:demo/helpers/Rider.dart';
 import 'package:demo/services/AuthService.dart';
 
 
@@ -26,18 +26,26 @@ class _UserRidesPageState extends State<UserRidesPage> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
+    final mySQfLite = DatabaseUserID();
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("My Profile", style: TextStyle(
+          title: const Text("My Profile", style: TextStyle(
               color: Colors.white, fontSize:20, fontWeight: FontWeight.bold),),
           actions: [
             Container(
               margin: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                   onPressed: () async {
-                    await authService.signOut();
                     debugPrint("Signing you out!");
+                    await mySQfLite.ifExistDB();
+                    setState(() {
+
+                      debugPrint("current user listener updated, now DELETING local profile data...");
+                      mySQfLite.removeDB();
+                    });
+                    await mySQfLite.ifExistDB();
+                    await authService.signOut();
                     if(context.mounted)Navigator.pushReplacementNamed(context, "/Login");
                   },
                   style: ElevatedButton.styleFrom(
@@ -150,92 +158,108 @@ class _UserRidesPageState extends State<UserRidesPage> {
                 //eccentricity: 0.5
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: StreamBuilder(
-                stream: FirebaseService.getRiderHistory(authService.getUserUID()),
-                //returns a stream of ONLY the rides where user is involved.
-                builder: (context, snapshot){
-                  if (snapshot.hasData){
+              child:
+                StreamBuilder(
+                  stream: FirebaseFirestore.instance.collection('routes').snapshots(),
+                  builder: (context, snapshot){
+                    if (snapshot.hasData){
+                      return StreamBuilder(
+                        stream: FirebaseService.getRiderHistory(authService.getUserUID()),
+                        //returns a stream of ONLY the rides where user is involved.
+                        builder: (context, snapshot){
+                          if (snapshot.hasData){
 
 
-                    //updates the documents with the rides
-                    //TODO very important: ride status, when changed, is not updated at rider's end. (unless hot reload)
-                    // // Extract a list of DocumentChanges
-                    // List<DocumentChange<Map<String, dynamic>>> documentChanges = snapshot.data!.docChanges;
+                            //updates the documents with the rides
+                            //TODO very important: ride status, when changed, is not updated at rider's end. (unless hot reload)
+                            // // Extract a list of DocumentChanges
+                            // List<DocumentChange<Map<String, dynamic>>> documentChanges = snapshot.data!.docChanges;
 
-                    List<DocumentSnapshot> rideHistory = snapshot.data!;
+                            List<DocumentSnapshot> rideHistory = snapshot.data!;
 
 
-                    // return Text('${rideHistory[0].id} => ${rideHistory[0].data()} check debug');
-                    // documents = snapshot.data!.docs;
-                    // documents = documents.where((element) {
-                    //   return element
-                    //       .get('riders')
-                    //       .contains(searchText.toLowerCase());
-                    // }).toList();
+                            // return Text('${rideHistory[0].id} => ${rideHistory[0].data()} check debug');
+                            // documents = snapshot.data!.docs;
+                            // documents = documents.where((element) {
+                            //   return element
+                            //       .get('riders')
+                            //       .contains(searchText.toLowerCase());
+                            // }).toList();
 
-                    return ListView.builder(
-                    itemCount: rideHistory.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        color: Colors.white70,
-                        margin: const EdgeInsets.all(8.0),
-                        child: ListTile(
-                        title: Wrap(
-                          children: [
-                            Text("${rideHistory[index]['from_loc']}",
-                                style: const TextStyle(fontWeight: FontWeight.bold,)),
-                            const Text(" to "),
-                            Text("${rideHistory[index]['to_loc']}",
-                                style: const TextStyle(fontWeight: FontWeight.bold,)),
-                          ],
-                        ),
-                        subtitle: Wrap(
-                          children: [
-                            Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                Text("driver ${rideHistory[index]['status']} "),
-                                Text("my status: ", //display the rider subcollection info
-                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple.shade800),),
-                                RiderSubcollectionWidget(
-                                    route_id: rideHistory[index].id, rider_uid: authService.getUserUID()),
-                                const SizedBox(height:10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("${rideHistory[index]['time']}"),
-                                    Container(
-                                        alignment: Alignment.center,
-                                        padding: const EdgeInsets.all(5.0),
-                                        color:Colors.purple.shade100,
-                                        child: Text("${rideHistory[index]['price']} L.E."))
-                                  ],
-                                )
-                              ]
-                            ),
-                          ],
-                        ),
+                            return ListView.builder(
+                              itemCount: rideHistory.length,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  color: Colors.white70,
+                                  margin: const EdgeInsets.all(8.0),
+                                  child: ListTile(
+                                    title: Wrap(
+                                      children: [
+                                        Text("${rideHistory[index]['from_loc']}",
+                                            style: const TextStyle(fontWeight: FontWeight.bold,)),
+                                        const Text(" to "),
+                                        Text("${rideHistory[index]['to_loc']}",
+                                            style: const TextStyle(fontWeight: FontWeight.bold,)),
+                                      ],
+                                    ),
+                                    subtitle: Wrap(
+                                      children: [
+                                        Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text("driver ${rideHistory[index]['status']} "),
+                                              Text("my status: ", //display the rider subcollection info
+                                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple.shade800),),
+                                              RiderSubcollectionWidget(
+                                                  route_id: rideHistory[index].id, rider_uid: authService.getUserUID()),
+                                              const SizedBox(height:10),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text("${rideHistory[index]['time']}"),
+                                                  Container(
+                                                      alignment: Alignment.center,
+                                                      padding: const EdgeInsets.all(5.0),
+                                                      color:Colors.purple.shade100,
+                                                      child: Text("${rideHistory[index]['price']} L.E."))
+                                                ],
+                                              )
+                                            ]
+                                        ),
+                                      ],
+                                    ),
 
-                        ),
+                                  ),
+                                );
+                              }, //list of listTiles
+
+
+                            );
+                          }
+                          else if (snapshot.hasError){
+                            debugPrint("${snapshot.error}");
+                            return Text("${snapshot.error}");
+                          }
+                          else{
+                            return const CircularProgressIndicator();
+                          }
+
+                        },
                       );
-                    }, //list of listTiles
+                    }
+                    else if (snapshot.hasError){
+                      debugPrint("${snapshot.error}");
+                      return Text("${snapshot.error}");
+                    }
+                    else{
+                      return const CircularProgressIndicator();
+                    }
 
-
-                    );
-                  }
-                  else if (snapshot.hasError){
-                    debugPrint("${snapshot.error}");
-                    return Text("${snapshot.error}");
-                  }
-                  else{
-                    return const CircularProgressIndicator();
-                  }
-
-                },
+                  },
+                ),
               ),
-            ),
 
           ],
 

@@ -1,7 +1,7 @@
 
 //TODO delete this
 
-import 'package:demo/classes/Ride.dart';
+import 'package:demo/helpers/Ride.dart';
 import 'package:flutter/material.dart';
 
 class FilteredRidesProvider extends ChangeNotifier{

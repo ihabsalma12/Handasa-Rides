@@ -1,3 +1,4 @@
+import 'package:demo/helpers/DatabaseUserID.dart';
 import 'package:demo/services/AuthService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
-
+    final mySQfLite = DatabaseUserID();
 
     return Scaffold(
       body: Padding(
@@ -112,18 +113,24 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () async {
                       if(formKey.currentState!.validate()) {
                         try{
-                         await authService.signInWithEmailAndPassword(email: emailContr.text, password: passContr.text);}
+                         await authService.signInWithEmailAndPassword(email: emailContr.text, password: passContr.text);
+                         setState(() {
+                           // mySQfLite.ifExistDB();
+                           debugPrint("current user listener updated, now updating local profile data...");
+                           mySQfLite.insertUser(authService.getUserUID(), authService.getUserEmail(), authService.getDisplayName());
+                           // mySQfLite.ifExistDB();
+                         });
+                        }
                         catch (error){
-                          final snackBar = SnackBar(content: Text('Login error happened: ${error.toString()}'),);
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          if(context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Login error happened: ${error.toString()}'),));
                           return;
                         }
                           debugPrint("All is good! Logged in.");
-                          if (!mounted) return;
-                          else{
+                          if (context.mounted){
                             Navigator.pushReplacementNamed(context, "/UserRides");
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Welcome, ${authService.getDisplayName()}!'),));
-
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Welcome, ${authService.getDisplayName()}!'),));
                           }
                           // formKey.currentState!.reset();
                         }

@@ -1,6 +1,6 @@
 //controls which screen to show first
 import 'package:demo/services/AuthService.dart';
-import 'package:demo/classes/Rider.dart';
+import 'package:demo/helpers/Rider.dart';
 import 'package:demo/view/login.dart';
 import 'package:demo/view/my_rides.dart';
 import 'package:flutter/material.dart';

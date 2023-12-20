@@ -1,3 +1,4 @@
+import 'package:demo/helpers/DatabaseUserID.dart';
 import 'package:demo/services/AuthService.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
+    final mySQfLite = DatabaseUserID();
 
     return Scaffold(
       body: Padding(
@@ -146,21 +148,28 @@ class _SignUpPageState extends State<SignUpPage> {
                       //   backgroundColor: Theme.of(context).primaryColorDark,
                       // ),
                       onPressed: ()async{
-                        // TODO output snackbar for "Welcome" or for errors signing up.
                         if(signupFormKey.currentState!.validate()){
-                          try{await authService.createUserWithEmailAndPassword(
+                          try{
+                            await authService.createUserWithEmailAndPassword(
                             fullName: fnameContr.text,
-                              email: signupEmailContr.text, password: signupPassContr.text);}
+                              email: signupEmailContr.text, password: signupPassContr.text);
+                            // await mySQfLite.ifExistDB();
+                            setState(() {
+
+                              debugPrint("current user listener updated, now updating local profile data...");
+                              mySQfLite.insertUser(authService.getUserUID(), authService.getUserEmail(), authService.getDisplayName());
+
+                            });
+                            // await mySQfLite.ifExistDB();
+                          }
                           catch (error){
-                            final snackBar = SnackBar(content: Text('Signup error happened: ${error.toString()}'),);
-                            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Signup error happened: ${error.toString()}'),));
                             return;
                           }
 
                           debugPrint("All is good! Signed up.");
-                          if (!mounted) {
-                            return;
-                          } else{
+                          if (context.mounted){
                             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
                                 builder: (c) => const UserRidesPage()),
                                     (route) => false);

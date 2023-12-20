@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:demo/classes/FilteredRidesProvider.dart';
-import 'package:demo/classes/BottomSheetProvider.dart';
+import 'package:demo/helpers/FilteredRidesProvider.dart';
+import 'package:demo/helpers/BottomSheetProvider.dart';
 import 'package:demo/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:demo/classes/Ride.dart';
+import 'package:demo/helpers/Ride.dart';
 
 
 

@@ -1,11 +1,10 @@
 import 'package:demo/services/AuthService.dart';
-import 'package:demo/classes/BottomSheetProvider.dart';
-import 'package:demo/classes/FilteredRidesProvider.dart';
+import 'package:demo/helpers/BottomSheetProvider.dart';
+import 'package:demo/helpers/FilteredRidesProvider.dart';
 import 'package:demo/view/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:demo/view/login.dart';
 import 'package:demo/view/signup.dart';
-import 'package:demo/view/change_pass.dart';
 import 'package:demo/view/route_list.dart';
 import 'package:demo/view/ride_details.dart';
 import 'package:demo/view/my_rides.dart';
@@ -40,7 +39,6 @@ Future <void> main() async {
 
           "/Login": (context) => const LoginPage(),
           "/SignUp": (context) => const SignUpPage(),
-          "/ChangePass": (context) => const ChangePassPage(),
           "/RouteSelect": (context) => const RouteSelectionPage(),
           "/RouteDetails": (context) => const RouteDetailsPage(),
           "/UserRides": (context) => const UserRidesPage(),

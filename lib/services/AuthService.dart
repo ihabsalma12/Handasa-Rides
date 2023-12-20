@@ -1,4 +1,4 @@
-import 'package:demo/classes/Rider.dart';
+import 'package:demo/helpers/Rider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 //controls login and signup in firebase
@@ -16,14 +16,14 @@ class AuthService{
     return _firebaseAuth.authStateChanges().map(_riderFromFirebase);
   }
 
-  String getUserUID(){
-    return _firebaseAuth.currentUser!.uid;
+  String? getUserUID(){
+    return _firebaseAuth.currentUser?.uid;
   }
   String? getDisplayName(){
-    return _firebaseAuth.currentUser!.displayName;
+    return _firebaseAuth.currentUser?.displayName;
   }
-  get user_email{
-    return _firebaseAuth.currentUser!.email;
+  String? getUserEmail(){
+    return _firebaseAuth.currentUser?.email;
   }
 
   Future<Rider?> signInWithEmailAndPassword({required String email, required String password}) async {
